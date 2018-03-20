@@ -5,11 +5,12 @@ turtles-own[action-prob mutation-prob mutation-rate mating-radius age]
 to setup
   clear-all
   reset-ticks
- ask patches [  set dist distance (patch 0 0) / max-pxcor]
+  ;;ask patches [  set dist distance (patch 0 0) / max-pxcor]
+  ask patches [  set dist  pxcor / max-pxcor]
    set-web-protection danger-type
 
 
-create-turtles 1000
+create-turtles 100
 ask turtles [
   setxy random-xcor random-ycor; 0
   set action-prob precision random-float 1 2
@@ -51,7 +52,7 @@ to test-survival
 end
 
 to reproduce
-  if random-float 1 < 0.4 ;; probability of mating
+  if random-float 1 < 0.3 ;; probability of mating
   [
     if any? other turtles in-radius mating-radius
     [
@@ -60,7 +61,7 @@ to reproduce
     let mates-prob [action-prob] of mate
     hatch 1 [
       let mutate 0
-      if random-float 0.1 < mutation-prob
+      if random-float 0.01 < mutation-prob
       [
        ifelse random-float 1 < 0.5
        [set mutate mutation-rate]
@@ -68,7 +69,7 @@ to reproduce
       ]
       set action-prob (((my-prob + mates-prob) / 2)  + mutate)
       set age 0
-      setxy random-xcor random-ycor; 0
+     ; setxy random-xcor random-ycor; 0
       ]
     ]
     ]
@@ -105,8 +106,9 @@ to-report sigmoid [x]
 end
 
 to register
-if (file-exists? "chuchu.csv")[file-delete "chuchu.csv"]
-file-open "chuchu.csv"
+  let filename word danger-type ".csv"
+if (file-exists? filename)[file-delete filename]
+file-open filename
 file-print  (word "ticks , who , action-prob , danger-level")
 ask turtles [
  ; let str
@@ -121,9 +123,9 @@ GRAPHICS-WINDOW
 210
 10
 630
-451
-20
-20
+151
+-1
+-1
 10.0
 1
 10
@@ -131,13 +133,13 @@ GRAPHICS-WINDOW
 1
 1
 0
+0
+0
 1
-1
-1
--20
-20
--20
-20
+0
+40
+0
+10
 0
 0
 1
@@ -167,7 +169,7 @@ BUTTON
 176
 175
 NIL
-;repeat 100 [go]\ngo
+repeat 100 [go]\n;go
 NIL
 1
 T
@@ -189,24 +191,6 @@ count turtles
 1
 11
 
-PLOT
-707
-61
-907
-211
-plot 1
-NIL
-NIL
-0.0
-1.0
-0.0
-100.0
-true
-true
-"" ""
-PENS
-"default" 1.0 0 -5298144 true "" "histogram [action-prob] of turtles"
-
 CHOOSER
 50
 18
@@ -215,7 +199,7 @@ CHOOSER
 danger-type
 danger-type
 "linear" "exponential" "sigmoid"
-0
+1
 
 BUTTON
 73
@@ -598,6 +582,20 @@ NetLogo 5.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="50" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>register</final>
+    <timeLimit steps="50"/>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="danger-type">
+      <value value="&quot;linear&quot;"/>
+      <value value="&quot;exponential&quot;"/>
+      <value value="&quot;sigmoid&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
