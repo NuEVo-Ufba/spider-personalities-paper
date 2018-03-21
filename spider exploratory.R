@@ -1,13 +1,31 @@
-ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1)
-
-spiders = read.csv("chuchu.csv", header=T)
-plot(spiders$action.prob~spiders$danger.level)
-plot(aggregate(x = spiders$action.prob, by = list(spiders$danger.level), FUN=mean ))
 library(ggplot2)
 library(viridis)
-myplot=ggplot(spiders, aes(x=danger.level, y=action.prob, color= action.prob)) + geom_point() + scale_color_viridis() + theme_minimal() +
-  ylim(0, 1) +
-  xlim(0, 1) +
+
+
+spiders = read.csv("chuchu.csv", header=T)
+head(spiders)
+str(spiders)
+
+#linear = read.table("output.csv", header=F,sep=",")
+files.linear <- list.files(path="output",full.names = T,pattern = "linear")
+tmp.linear=  lapply(files.linear, read.table,  header=F,sep=",")
+linear = do.call(rbind, tmp.linear)
+colnames(linear)=c("ticks" , "who" , "action_prob" , "danger_level", "danger_type", "replicate_number")
+head(linear)
+str(linear)
+
+
+#plot(spiders$action.prob~spiders$danger.level)
+#plot(aggregate(x = spiders$action-prob, by = list(spiders$danger-level), FUN=mean ))
+
+agg= aggregate( linear$action_prob, by = list(linear$danger_level,linear$replicate_number), FUN=mean )
+plot(x=agg$Group.1,y=agg$x,col=agg$Group.2)
+
+linear.means =
+
+myplot.linear=  ggplot(linear, aes(x=danger_level, y=action_prob, color= danger_type)) + geom_point()  + theme_minimal() +
+  # ylim(0, 1) +
+  #xlim(0, 1) +
    theme(
      axis.line.y =  element_line(colour = "black"),
      axis.line.x =  element_line(colour = "black"),
@@ -18,7 +36,7 @@ myplot=ggplot(spiders, aes(x=danger.level, y=action.prob, color= action.prob)) +
      panel.border = element_blank(),
      panel.background = element_blank()) +
   labs(x="Nível de perigo",y="Personalidade",color="Pers.")
-
+x11(); myplot.linear
 ggsave("myplot.jpg",device = "jpg")
 modelo=lm(spiders$action.prob~spiders$danger.level)
 abline(modelo)

@@ -1,4 +1,4 @@
-
+;globals [replicate-number]
 patches-own[danger-level dist]
 turtles-own[action-prob mutation-prob mutation-rate mating-radius age]
 
@@ -7,7 +7,9 @@ to setup
   reset-ticks
   ;;ask patches [  set dist distance (patch 0 0) / max-pxcor]
   ask patches [  set dist  pxcor / max-pxcor]
-   set-web-protection danger-type
+  set-web-protection danger-type
+ ; set seed replicate-number
+  random-seed  replicate-number
 
 
 create-turtles 100
@@ -106,15 +108,28 @@ to-report sigmoid [x]
 end
 
 to register
-  let filename word danger-type ".csv"
-if (file-exists? filename)[file-delete filename]
-file-open filename
-file-print  (word "ticks , who , action-prob , danger-level")
-ask turtles [
- ; let str
- let rounded-danger precision [danger-level] of patch-here 2
+  let filename (word danger-type "_" replicate-number ".csv")
+  if (file-exists? filename) [file-delete filename]
+  file-open filename
+  file-print  (word "ticks , who , action-prob , danger-level")
+  ask turtles
+  [
+    let rounded-danger precision [danger-level] of patch-here 2
+    file-print  (word ticks "," who "," action-prob "," rounded-danger "," danger-type)
+  ]
+  file-close
+end
 
-  file-print  (word ticks "," who "," action-prob "," rounded-danger)
+to register2
+  let filename (word  danger-type "_" replicate-number ".csv")
+  set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
+  if (file-exists? filename) [file-delete filename]
+  file-open filename
+  ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
+  ask turtles
+  [
+    let rounded-danger precision [danger-level] of patch-here 2
+    file-print  (word ticks "," who "," action-prob "," rounded-danger "," danger-type "," replicate-number)
   ]
   file-close
 end
@@ -199,7 +214,7 @@ CHOOSER
 danger-type
 danger-type
 "linear" "exponential" "sigmoid"
-1
+2
 
 BUTTON
 73
@@ -217,6 +232,16 @@ NIL
 NIL
 NIL
 1
+
+CHOOSER
+204
+203
+342
+248
+replicate-number
+replicate-number
+1 2 3 4 5 6 7 8 9 10
+9
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -583,12 +608,13 @@ NetLogo 5.3
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="50" runMetricsEveryStep="false">
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <final>register</final>
+    <final>register2</final>
     <timeLimit steps="50"/>
-    <metric>count turtles</metric>
+    <exitCondition>(count turtles) &gt;= 5000</exitCondition>
+    <steppedValueSet variable="replicate-number" first="1" step="1" last="10"/>
     <enumeratedValueSet variable="danger-type">
       <value value="&quot;linear&quot;"/>
       <value value="&quot;exponential&quot;"/>
