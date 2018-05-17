@@ -2,10 +2,6 @@ library(ggplot2)
 library(viridis)
 
 
-spiders = read.csv("chuchu.csv", header=T)
-head(spiders)
-str(spiders)
-
 #linear = read.table("output.csv", header=F,sep=",")
 files.linear <- list.files(path="output",full.names = T,pattern = "linear")
 tmp.linear=  lapply(files.linear, read.table,  header=F,sep=",")

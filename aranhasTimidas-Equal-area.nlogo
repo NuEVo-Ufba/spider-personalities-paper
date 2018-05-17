@@ -1,4 +1,4 @@
-;globals [replicate-number]
+;;globals [replicate-number]
 patches-own[danger-level dist]
 turtles-own[action-prob mutation-prob mutation-rate mating-radius age]
 
@@ -122,23 +122,33 @@ end
 
 to register2
   let filename (word  danger-type "_" replicate-number ".csv")
-  set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
+  ;;set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
+  set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
   file-open filename
   ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
+  let dt "a"
+  if (danger-type = "linear" )      [set dt "l"]
+  if (danger-type = "sigmoid" )     [set dt "s"]
+  if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
     let rounded-danger precision [danger-level] of patch-here 2
-    file-print  (word ticks "," who "," action-prob "," rounded-danger "," danger-type "," replicate-number)
+    let rounded-action-prob precision  action-prob 2
+    file-print  (word ticks "," who "," rounded-action-prob "," rounded-danger "," dt "," replicate-number)
   ]
   file-close
+end
+
+to output
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-630
-151
+628
+129
 -1
 -1
 10.0
@@ -233,15 +243,20 @@ NIL
 NIL
 1
 
-CHOOSER
-204
-203
-342
-248
+SLIDER
+189
+283
+361
+316
 replicate-number
 replicate-number
-1 2 3 4 5 6 7 8 9 10
-9
+0
+500
+500.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -601,9 +616,8 @@ false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
-
 @#$#@#$#@
-NetLogo 5.3
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -614,7 +628,7 @@ NetLogo 5.3
     <final>register2</final>
     <timeLimit steps="50"/>
     <exitCondition>(count turtles) &gt;= 5000</exitCondition>
-    <steppedValueSet variable="replicate-number" first="1" step="1" last="10"/>
+    <steppedValueSet variable="replicate-number" first="1" step="1" last="500"/>
     <enumeratedValueSet variable="danger-type">
       <value value="&quot;linear&quot;"/>
       <value value="&quot;exponential&quot;"/>
@@ -634,7 +648,6 @@ true
 0
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
-
 @#$#@#$#@
 0
 @#$#@#$#@
