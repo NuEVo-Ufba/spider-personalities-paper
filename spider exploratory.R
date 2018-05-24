@@ -10,16 +10,9 @@ colnames(linear)=c("ticks" , "who" , "action_prob" , "danger_level", "danger_typ
 head(linear)
 str(linear)
 
-
-#plot(spiders$action.prob~spiders$danger.level)
-#plot(aggregate(x = spiders$action-prob, by = list(spiders$danger-level), FUN=mean ))
-
 agg= aggregate( linear$action_prob, by = list(linear$danger_level,linear$replicate_number), FUN=mean )
-plot(x=agg$Group.1,y=agg$x,col=agg$Group.2)
 
-linear.means =
-
-myplot.linear=  ggplot(linear, aes(x=danger_level, y=action_prob, color= danger_type)) + geom_point()  + theme_minimal() +
+myplot.linear=  ggplot(linear, aes(x=danger_level, y=action_prob,aplha=0.3)) + geom_point()  + theme_minimal() +
   # ylim(0, 1) +
   #xlim(0, 1) +
    theme(
@@ -31,11 +24,31 @@ myplot.linear=  ggplot(linear, aes(x=danger_level, y=action_prob, color= danger_
      panel.grid.minor = element_blank(),
      panel.border = element_blank(),
      panel.background = element_blank()) +
-  labs(x="Nível de perigo",y="Personalidade",color="Pers.")
-x11(); myplot.linear
-ggsave("myplot.jpg",device = "jpg")
-modelo=lm(spiders$action.prob~spiders$danger.level)
-abline(modelo)
+  labs(x="Nível de perigo",y="Personalidade",color="Pers.")+scale_fill_viridis()
+#x11(); myplot.linear
+ggsave("myplot2.jpg",device = "jpg")
+head(linear)
+mean.linear= aggregate(x = linear$action_prob, by=list(linear$danger_level), FUN= mean)
+plot(mean.linear)
+sd.linear= aggregate(x = linear$action_prob, by=list(linear$danger_level), FUN= sd)
+plot(sd.linear)
 
-summary(modelo)
-plot(modelo)
+
+files <- list.files(path="output",full.names = T,pattern = ".csv")
+tmp =  lapply(files, read.table,  header=F,sep=",")
+spiders = do.call(rbind, tmp)
+colnames(spiders)=c("ticks" , "who" , "action_prob" , "danger_level", "danger_type", "replicate_number")
+spiders$danger_type=as.factor(spiders$danger_type)
+str(spiders)
+p <- ggplot(spiders, aes(x=spiders$danger_type, y=spiders$action_prob)) + 
+  #geom_boxplot(notch=TRUE) +
+  scale_color_viridis() + geom_violin() + ggtitle("linear, exponential and sigmoid")
+ggsave("linear, exponential and sigmoid.jpg",device = "jpg")
+x11();p
+
+modelo=lm(spiders$action_prob ~ spiders$danger_type)
+mod= aov(spiders$action_prob ~ spiders$danger_type)
+tk=TukeyHSD(mod) 
+print(tk)
+summary.aov(mod)
+rm(ls="modelo")

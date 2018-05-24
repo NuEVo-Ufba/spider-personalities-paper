@@ -133,9 +133,9 @@ to register2
   if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
-    let rounded-danger precision [danger-level] of patch-here 2
-    let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," rounded-action-prob "," rounded-danger "," dt "," replicate-number)
+  ;  let rounded-danger precision [danger-level] of patch-here 2
+  ;  let rounded-action-prob precision  action-prob 2
+    file-print  (word ticks "," who "," action-prob "," danger "," dt "," replicate-number)
   ]
   file-close
 end
