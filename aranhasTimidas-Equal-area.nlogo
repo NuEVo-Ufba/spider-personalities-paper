@@ -1,3 +1,4 @@
+extensions [table]
 ;;globals [replicate-number]
 patches-own[danger-level dist]
 turtles-own[action-prob mutation-prob mutation-rate mating-radius age]
@@ -82,6 +83,17 @@ to age-die
   if age > 5  [die]
 end
 
+;to set-web-protection [protection-type]
+;if (protection-type = "linear" )[ask patches [set danger-level dist]] ;; linear
+;if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]] ;; sigmoid;
+;if (protection-type = "exponential")[ask patches [set danger-level normalize exp(dist) exp(0) exp(1) ] ]  ;; exponential
+;;ask patches[set pcolor scale-color red danger-level 1 0]
+;ask patches[
+;  if (danger-level > 1) [set danger-level 1]
+;  set pcolor danger-level * 10
+;  ]
+;end
+
 to set-web-protection [protection-type]
 if (protection-type = "linear" )[ask patches [set danger-level dist]] ;; linear
 if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]] ;; sigmoid;
@@ -103,7 +115,7 @@ end
 
 
 to-report sigmoid [x]
-  let y 1 /( 1 + (exp (- 5 * (x - 0.5))))
+  let y 1 /( 1 + (exp (par * (x - 0.5))))
   report y
 end
 
@@ -121,7 +133,7 @@ to register
 end
 
 to register2
-  let filename (word  danger-type "_" replicate-number ".csv")
+  let filename (word  danger-type "_par" par "_" replicate-number ".csv")
   ;;set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
   set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
@@ -129,18 +141,39 @@ to register2
   ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
   let dt "a"
   if (danger-type = "linear" )      [set dt "l"]
-  if (danger-type = "sigmoid" )     [set dt "s"]
+  if (danger-type = "sigmoid" )     [set dt  word"s " par ]
   if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
   ;  let rounded-danger precision [danger-level] of patch-here 2
   ;  let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," action-prob "," danger "," dt "," replicate-number)
+    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," par)
   ]
   file-close
 end
 
 to output
+
+end
+
+to plot-danger-shape
+  set-current-plot "plot-danger"
+  clear-plot
+  set-current-plot-pen "pen-0"
+
+  let agents patches with[pycor = 0]
+  ;show agents
+  set agents sort-on [pxcor] agents
+  ;show agents-sorted
+  ;ask agents [show who]
+  foreach agents  [
+    pp ->  ;; this line defines pp as an alias for each element of the "agents" list
+    ask pp [
+    ;;  show danger-level
+    plot danger-level
+    ]
+  ]
+ ; ask agents-sorted [plot danger-level]
 
 end
 @#$#@#$#@
@@ -229,10 +262,10 @@ danger-type
 BUTTON
 73
 310
-147
+154
 343
 NIL
-register\n
+register2\n
 NIL
 1
 T
@@ -252,7 +285,57 @@ replicate-number
 replicate-number
 0
 500
-500.0
+0.0
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+543
+247
+743
+397
+plot-danger
+NIL
+NIL
+0.0
+1.0
+0.0
+1.0
+true
+false
+"" "clear-plot"
+PENS
+"pen-0" 1.0 0 -7500403 true "" ""
+
+BUTTON
+220
+237
+354
+270
+NIL
+plot-danger-shape
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+216
+168
+388
+201
+par
+par
+-50
+0
+-20.0
 1
 1
 NIL
@@ -634,6 +717,18 @@ NetLogo 6.0.3
       <value value="&quot;exponential&quot;"/>
       <value value="&quot;sigmoid&quot;"/>
     </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment2" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>register2</final>
+    <timeLimit steps="50"/>
+    <exitCondition>(count turtles) &gt;= 5000</exitCondition>
+    <steppedValueSet variable="replicate-number" first="1" step="1" last="500"/>
+    <enumeratedValueSet variable="danger-type">
+      <value value="&quot;sigmoid&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="par" first="-20" step="5" last="-1"/>
   </experiment>
 </experiments>
 @#$#@#$#@
