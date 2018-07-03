@@ -38,7 +38,7 @@ to go
 end
 
 to move
-  if (random-float 1 > action-prob) [
+  if (random-float 1 < action-prob) [
   rt random 360
   lt random 360
   fd 3
@@ -55,7 +55,7 @@ to test-survival
 end
 
 to reproduce
-  if random-float 1 < 0.3 ;; probability of mating
+  if random-float 1 < 0.22 ;; probability of mating
   [
     if any? other turtles in-radius mating-radius
     [
@@ -63,8 +63,8 @@ to reproduce
     let mate one-of other turtles in-radius mating-radius
     let mates-prob [action-prob] of mate
     hatch 1 [
-      let mutate 0
-      if random-float 0.01 < mutation-prob
+      let mutate 0.0
+      if random-float 1 < mutation-prob
       [
        ifelse random-float 1 < 0.5
        [set mutate mutation-rate]
@@ -94,13 +94,16 @@ end
 ;  ]
 ;end
 
+
 to set-web-protection [protection-type]
-if (protection-type = "linear" )[ask patches [set danger-level dist]] ;; linear
+if (protection-type = "linear" )[ask patches [set danger-level linear a b dist]] ;; linear
 if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]] ;; sigmoid;
 if (protection-type = "exponential")[ask patches [set danger-level normalize exp(dist) exp(0) exp(1) ] ]  ;; exponential
 ;ask patches[set pcolor scale-color red danger-level 1 0]
 ask patches[
-  if (danger-level > 1) [set danger-level 1]
+    ;show "xuxu"
+    if (danger-level >= 1.0)[ set danger-level 0.99 ]
+    if (danger-level <= 0.01)[ set danger-level 0.01 ]
   set pcolor danger-level * 10
   ]
 end
@@ -113,6 +116,10 @@ to-report normalize [number minimum maximum ]
 report normalized
 end
 
+to-report linear [inclination intercept x]
+  ;; ax + b
+  report (inclination * x) + intercept
+end
 
 to-report sigmoid [x]
   let y 1 /( 1 + (exp (par * (x - 0.5))))
@@ -133,7 +140,7 @@ to register
 end
 
 to register2
-  let filename (word  danger-type "_par" par "_" replicate-number ".csv")
+  let filename (word  danger-type "_par" par "_a" a "_b" b "_"replicate-number ".csv")
   ;;set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
   set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
@@ -147,7 +154,7 @@ to register2
   [
   ;  let rounded-danger precision [danger-level] of patch-here 2
   ;  let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," par)
+    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," par"," a"," b)
   ]
   file-close
 end
@@ -160,7 +167,6 @@ to plot-danger-shape
   set-current-plot "plot-danger"
   clear-plot
   set-current-plot-pen "pen-0"
-
   let agents patches with[pycor = 0]
   ;show agents
   set agents sort-on [pxcor] agents
@@ -174,6 +180,16 @@ to plot-danger-shape
     ]
   ]
  ; ask agents-sorted [plot danger-level]
+
+end
+
+to plot-personalities
+  set-current-plot "personalities"
+  clear-plot
+ set-current-plot-pen "pen-0"
+  set-plot-pen-mode 1
+  set-histogram-num-bars 5
+histogram [action-prob] of turtles
 
 end
 @#$#@#$#@
@@ -205,12 +221,12 @@ ticks
 30.0
 
 BUTTON
-25
-83
-88
-116
-NIL
-setup
+28
+84
+130
+117
+Setup
+setup\nplot-danger-shape\nplot-personalities\n
 NIL
 1
 T
@@ -224,10 +240,10 @@ NIL
 BUTTON
 35
 142
-176
+380
 175
 NIL
-repeat 100 [go]\n;go
+repeat 10 [go]\n;go\nplot-personalities\nplot-danger-shape
 NIL
 1
 T
@@ -257,7 +273,7 @@ CHOOSER
 danger-type
 danger-type
 "linear" "exponential" "sigmoid"
-2
+1
 
 BUTTON
 73
@@ -277,30 +293,30 @@ NIL
 1
 
 SLIDER
-189
-283
-361
-316
+430
+237
+602
+270
 replicate-number
 replicate-number
 0
 500
-0.0
+500.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-543
-247
-743
-397
+209
+342
+409
+492
 plot-danger
 NIL
 NIL
 0.0
-1.0
+50.0
 0.0
 1.0
 true
@@ -327,10 +343,10 @@ NIL
 1
 
 SLIDER
-216
-168
-388
-201
+429
+129
+601
+162
 par
 par
 -50
@@ -340,6 +356,54 @@ par
 1
 NIL
 HORIZONTAL
+
+SLIDER
+429
+163
+601
+196
+a
+a
+0
+1
+1.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+430
+198
+602
+231
+b
+b
+0
+1
+0.0
+0.1
+1
+NIL
+HORIZONTAL
+
+PLOT
+412
+342
+612
+492
+personalities
+NIL
+NIL
+0.0
+5.0
+0.0
+1000.0
+true
+false
+"" ""
+PENS
+"pen-0" 1.0 1 -7500403 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -705,7 +769,7 @@ NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="experiment-allthree" repetitions="1" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <final>register2</final>
