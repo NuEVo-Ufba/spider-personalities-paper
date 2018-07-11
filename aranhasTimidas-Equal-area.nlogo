@@ -1,7 +1,6 @@
 extensions [table]
-;;globals [replicate-number]
 patches-own[danger-level dist]
-turtles-own[action-prob mutation-prob mutation-rate mating-radius age]
+turtles-own[action-prob mutation-prob mutation-rate mating-radius age personality]
 
 to setup
   clear-all
@@ -23,6 +22,7 @@ ask turtles [
   set shape "spider"
   set age 0
   set color green * action-prob
+  set-personality distribution
 ]
 
 end
@@ -37,12 +37,23 @@ to go
   tick
 end
 
+to set-personality [pers-dist]
+  if (pers-dist = "uniform")         [set personality random-float 1]
+  if (pers-dist = "all-bold")        [set personality random-float 1]
+  if (pers-dist = "normal")          [set personality random-normal 0.5 0.1]
+  if (pers-dist = "all-bold-normal") [set personality random-normal 0.8 0.1]
+  ;;controlling for personality greater than 1 or lower than zero
+  if (personality >= 0.9)[set personality 0.9]
+  if (personality <= 0.1)[set personality 0.1]
+end
+
+
 to move
-  if (random-float 1 < action-prob) [
-  rt random 360
-  lt random 360
-  fd 3
-  ]
+  ;; the higher the personality (boldness) value, the more likely the individual is to seek
+  ;; danger, else move randomly to one of neighboring patches
+ifelse random-float 1 < personality
+  [uphill danger-level]
+  [move-to one-of neighbors]
 end
 
 to test-survival
@@ -83,17 +94,6 @@ to age-die
   if age > 5  [die]
 end
 
-;to set-web-protection [protection-type]
-;if (protection-type = "linear" )[ask patches [set danger-level dist]] ;; linear
-;if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]] ;; sigmoid;
-;if (protection-type = "exponential")[ask patches [set danger-level normalize exp(dist) exp(0) exp(1) ] ]  ;; exponential
-;;ask patches[set pcolor scale-color red danger-level 1 0]
-;ask patches[
-;  if (danger-level > 1) [set danger-level 1]
-;  set pcolor danger-level * 10
-;  ]
-;end
-
 
 to set-web-protection [protection-type]
 if (protection-type = "linear" )[ask patches [set danger-level linear a b dist]] ;; linear
@@ -113,7 +113,7 @@ end
 to-report normalize [number minimum maximum ]
   let normalized 0
   set normalized  (number - minimum) / (maximum - minimum)
-report normalized
+  report normalized
 end
 
 to-report linear [inclination intercept x]
@@ -186,10 +186,10 @@ end
 to plot-personalities
   set-current-plot "personalities"
   clear-plot
- set-current-plot-pen "pen-0"
+  set-current-plot-pen "pen-0"
   set-plot-pen-mode 1
   set-histogram-num-bars 5
-histogram [action-prob] of turtles
+  histogram [action-prob] of turtles
 
 end
 @#$#@#$#@
@@ -221,10 +221,10 @@ ticks
 30.0
 
 BUTTON
-28
-84
-130
-117
+41
+137
+143
+170
 Setup
 setup\nplot-danger-shape\nplot-personalities\n
 NIL
@@ -238,10 +238,10 @@ NIL
 1
 
 BUTTON
-35
-142
-380
-175
+40
+173
+385
+206
 NIL
 repeat 10 [go]\n;go\nplot-personalities\nplot-danger-shape
 NIL
@@ -273,7 +273,7 @@ CHOOSER
 danger-type
 danger-type
 "linear" "exponential" "sigmoid"
-1
+2
 
 BUTTON
 73
@@ -351,7 +351,7 @@ par
 par
 -50
 0
--20.0
+-9.0
 1
 1
 NIL
@@ -366,7 +366,7 @@ a
 a
 0
 1
-1.0
+0.9
 0.1
 1
 NIL
@@ -404,6 +404,16 @@ false
 "" ""
 PENS
 "pen-0" 1.0 1 -7500403 true "" ""
+
+CHOOSER
+65
+77
+213
+122
+distribution
+distribution
+"uniform" "normal" "all-bold-normal" "all-bold"
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
