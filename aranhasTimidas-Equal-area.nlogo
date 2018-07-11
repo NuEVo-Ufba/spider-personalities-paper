@@ -1,4 +1,3 @@
-extensions [table]
 patches-own[danger-level dist]
 turtles-own[action-prob mutation-prob mutation-rate mating-radius age personality]
 
@@ -21,8 +20,8 @@ ask turtles [
   set mutation-prob 0.1
   set shape "spider"
   set age 0
-  set color green * action-prob
   set-personality distribution
+  set color green * personality
 ]
 
 end
@@ -41,7 +40,7 @@ to set-personality [pers-dist]
   if (pers-dist = "uniform")         [set personality random-float 1]
   if (pers-dist = "all-bold")        [set personality random-float 1]
   if (pers-dist = "normal")          [set personality random-normal 0.5 0.1]
-  if (pers-dist = "all-bold-normal") [set personality random-normal 0.8 0.1]
+  if (pers-dist = "all-bold-normal") [set personality random-normal 0.9 0.1]
   ;;controlling for personality greater than 1 or lower than zero
   if (personality >= 0.9)[set personality 0.9]
   if (personality <= 0.1)[set personality 0.1]
@@ -79,16 +78,15 @@ to reproduce
       let mutate 0.0
       if random-float 1 < mutation-prob
       [
-       ifelse random-float 1 < 0.5
-       [set mutate mutation-rate]
-       [set mutate mutation-rate * -1]
-      ]
+          ifelse random-float 1 < 0.5
+          [set mutate mutation-rate]
+          [set mutate mutation-rate * -1]
+        ]
       set action-prob (((my-prob + mates-prob) / 2)  + mutate)
       set age 0
-     ; setxy random-xcor random-ycor; 0
       ]
     ]
-    ]
+  ]
 end
 
 to age-die
@@ -98,15 +96,14 @@ end
 
 
 to set-web-protection [protection-type]
+;; danger distribution will always be sigmoid. linear and exponential left as records only
 if (protection-type = "linear" )[ask patches [set danger-level linear a b dist]] ;; linear
-if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]] ;; sigmoid;
 if (protection-type = "exponential")[ask patches [set danger-level normalize exp(dist) exp(0) exp(1) ] ]  ;; exponential
-;ask patches[set pcolor scale-color red danger-level 1 0]
+if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]]
 ask patches[
-    ;show "xuxu"
     if (danger-level >= 1.0)[ set danger-level 0.99 ]
     if (danger-level <= 0.01)[ set danger-level 0.01 ]
-  set pcolor danger-level * 10
+    set pcolor danger-level * 10
   ]
 end
 
@@ -129,34 +126,21 @@ to-report sigmoid [x]
   ;e  = Euler`s number
   ;k  = steepness of the curve, always a negative value in this case; gets steeper as it gets futher from zero
   ;x0 = midpoint of the sigmoid
+  ;x = patch position on web
 
   let y 1 /( 1 + (exp (k * (x - x0))))
   report y
 end
 
-;to register
-;  let filename (word danger-type "_" replicate-number ".csv")
-;  if (file-exists? filename) [file-delete filename]
-;  file-open filename
-;  file-print  (word "ticks , who , action-prob , danger-level")
-;  ask turtles
-;  [
-;    let rounded-danger precision [danger-level] of patch-here 2
-;    file-print  (word ticks "," who "," action-prob "," rounded-danger "," danger-type)
-;  ]
-;  file-close
-;end
-
 to register2
   let filename (word  danger-type "_k" k "_a" a "_b" b "_"replicate-number ".csv")
-  ;;set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
   set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
   file-open filename
   ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
   let dt "a"
   if (danger-type = "linear" )      [set dt "l"]
-  if (danger-type = "sigmoid" )     [set dt  word"s " k ]
+  if (danger-type = "sigmoid" )     [set dt  word "k " k ]
   if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
@@ -359,7 +343,7 @@ k
 k
 -50
 0
--25.0
+-50.0
 1
 1
 NIL
@@ -432,7 +416,7 @@ x0
 x0
 0
 1
-0.5
+0.6
 0.1
 1
 NIL
@@ -826,6 +810,35 @@ NetLogo 6.0.3
       <value value="&quot;sigmoid&quot;"/>
     </enumeratedValueSet>
     <steppedValueSet variable="par" first="-20" step="5" last="-1"/>
+  </experiment>
+  <experiment name="teste" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>register2</final>
+    <timeLimit steps="500"/>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="danger-type">
+      <value value="&quot;sigmoid&quot;"/>
+      <value value="&quot;linear&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="x0">
+      <value value="0.6"/>
+      <value value="0.7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="distribution">
+      <value value="&quot;uniform&quot;"/>
+      <value value="&quot;normal&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="k" first="-50" step="10" last="0"/>
+    <enumeratedValueSet variable="replicate-number">
+      <value value="500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="a">
+      <value value="0.9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b">
+      <value value="0"/>
+    </enumeratedValueSet>
   </experiment>
 </experiments>
 @#$#@#$#@
