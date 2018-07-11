@@ -60,8 +60,10 @@ to test-survival
 
   if random-float 1 < [danger-level] of patch-here ;; simulating a predation event
   [
-    if random-float 1 > action-prob ;; the most active, that is, the boldest ones, survive the predation event
-    [die]
+   ; if random-float 1 > action-prob ;; the most active, that is, the boldest ones, survive the predation event
+    ;]
+    die
+  ;]
   ]
 end
 
@@ -122,25 +124,31 @@ to-report linear [inclination intercept x]
 end
 
 to-report sigmoid [x]
-  let y 1 /( 1 + (exp (par * (x - 0.5))))
+  ;f(x) = L / 1 + eˆ( (x - x0)
+  ;L  = maximum value  <- always one in this case
+  ;e  = Euler`s number
+  ;k  = steepness of the curve, always a negative value in this case; gets steeper as it gets futher from zero
+  ;x0 = midpoint of the sigmoid
+
+  let y 1 /( 1 + (exp (k * (x - x0))))
   report y
 end
 
-to register
-  let filename (word danger-type "_" replicate-number ".csv")
-  if (file-exists? filename) [file-delete filename]
-  file-open filename
-  file-print  (word "ticks , who , action-prob , danger-level")
-  ask turtles
-  [
-    let rounded-danger precision [danger-level] of patch-here 2
-    file-print  (word ticks "," who "," action-prob "," rounded-danger "," danger-type)
-  ]
-  file-close
-end
+;to register
+;  let filename (word danger-type "_" replicate-number ".csv")
+;  if (file-exists? filename) [file-delete filename]
+;  file-open filename
+;  file-print  (word "ticks , who , action-prob , danger-level")
+;  ask turtles
+;  [
+;    let rounded-danger precision [danger-level] of patch-here 2
+;    file-print  (word ticks "," who "," action-prob "," rounded-danger "," danger-type)
+;  ]
+;  file-close
+;end
 
 to register2
-  let filename (word  danger-type "_par" par "_a" a "_b" b "_"replicate-number ".csv")
+  let filename (word  danger-type "_k" k "_a" a "_b" b "_"replicate-number ".csv")
   ;;set-current-directory "C:\\Users\\Vitor\\Dropbox\\repositorios\\space-spiders\\output"
   set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
@@ -148,13 +156,13 @@ to register2
   ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
   let dt "a"
   if (danger-type = "linear" )      [set dt "l"]
-  if (danger-type = "sigmoid" )     [set dt  word"s " par ]
+  if (danger-type = "sigmoid" )     [set dt  word"s " k ]
   if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
   ;  let rounded-danger precision [danger-level] of patch-here 2
   ;  let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," par"," a"," b)
+    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," k"," a"," b)
   ]
   file-close
 end
@@ -308,10 +316,10 @@ NIL
 HORIZONTAL
 
 PLOT
-209
-342
-409
-492
+125
+460
+325
+610
 plot-danger
 NIL
 NIL
@@ -343,15 +351,15 @@ NIL
 1
 
 SLIDER
-429
-129
-601
-162
-par
-par
+428
+276
+600
+309
+k
+k
 -50
 0
--9.0
+-25.0
 1
 1
 NIL
@@ -388,10 +396,10 @@ NIL
 HORIZONTAL
 
 PLOT
-412
-342
-612
-492
+328
+460
+528
+610
 personalities
 NIL
 NIL
@@ -414,6 +422,21 @@ distribution
 distribution
 "uniform" "normal" "all-bold-normal" "all-bold"
 0
+
+SLIDER
+428
+309
+600
+342
+x0
+x0
+0
+1
+0.5
+0.1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
