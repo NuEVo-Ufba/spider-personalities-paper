@@ -7,13 +7,13 @@ to setup
   ;;ask patches [  set dist distance (patch 0 0) / max-pxcor]
   ask patches [  set dist  pxcor / max-pxcor]
   set-web-protection danger-type
- ; set seed replicate-number
+  ; set random seed replicate-number
   random-seed  replicate-number
 
 
 create-turtles 100
 ask turtles [
-  setxy random-xcor random-ycor; 0
+  setxy random-xcor random-ycor;
   set action-prob precision random-float 1 2
   set mating-radius max-pxcor / 20
   set mutation-rate 0.01 ;;percentual change in action-prob value
@@ -38,7 +38,7 @@ end
 
 to set-personality [pers-dist]
   if (pers-dist = "uniform")         [set personality random-float 1]
-  if (pers-dist = "all-bold")        [set personality random-float 1]
+  if (pers-dist = "all-bold")        [set personality 1]
   if (pers-dist = "normal")          [set personality random-normal 0.5 0.1]
   if (pers-dist = "all-bold-normal") [set personality random-normal 0.9 0.1]
   ;;controlling for personality greater than 1 or lower than zero
@@ -53,6 +53,18 @@ to move
 ifelse random-float 1 < personality
   [uphill danger-level]
   [move-to one-of neighbors]
+  ;; adding a bit of randomness the coordinates
+  let x1 random-float 2 - 1 ; random number between -1 and 1
+  let y1 random-float 2 - 1 ; random number between -1 and 1
+  ;; moving and controlling for world edges
+  let x2 xcor + x1
+  let y2 ycor + y1
+
+  ifelse ( x2 >= max-pxcor) [] [if (x2 > min-pxcor)[ set xcor x2]] ;if not greater than max-pxcor and not smaller than min-pxcor
+  ifelse ( x2 <= min-pxcor) [] [if (x2 < max-pxcor)[ set xcor x2]] ;if not smaller than min-pxcor but not larger than max-pxcor
+  ifelse ( y2 >= max-pycor) [] [if (y2 > min-pycor)[ set ycor y2]] ;if not greater than max-pycor and not smaller than min-pycor
+  ifelse ( y2 <= min-pycor) [] [if (y2 < max-pycor)[ set ycor y2]] ;if not smaller than min-pxcor but not larger than max-pxcor
+
 end
 
 to test-survival
@@ -265,7 +277,7 @@ CHOOSER
 danger-type
 danger-type
 "linear" "exponential" "sigmoid"
-2
+0
 
 BUTTON
 73
@@ -405,7 +417,7 @@ CHOOSER
 distribution
 distribution
 "uniform" "normal" "all-bold-normal" "all-bold"
-0
+2
 
 SLIDER
 428
