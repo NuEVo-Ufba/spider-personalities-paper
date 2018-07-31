@@ -38,10 +38,10 @@ end
 
 to set-personality [pers-dist]
   if (pers-dist = "uniform")         [set personality random-float 1]
-  if (pers-dist = "all-bold")        [set personality 1]
+  if (pers-dist = "all-bold")        [set personality 0.9]
   if (pers-dist = "normal")          [set personality random-normal 0.5 0.1]
   if (pers-dist = "all-bold-normal") [set personality random-normal 0.9 0.1]
-  ;;controlling for personality greater than 1 or lower than zero
+  ;;controlling for personality greater than 1 or lower than 0.1
   if (personality >= 0.9)[set personality 0.9]
   if (personality <= 0.1)[set personality 0.1]
 end
@@ -53,20 +53,16 @@ to move
 ifelse random-float 1 < personality
   [uphill danger-level]
   [move-to one-of neighbors]
+
   ;; adding a bit of randomness the coordinates
   let x1 random-float 2 - 1 ; random number between -1 and 1
   let y1 random-float 2 - 1 ; random number between -1 and 1
   ;; moving and controlling for world edges
   let x2 xcor + x1
   let y2 ycor + y1
-  ;; NetLogo boolean operators are stupid
-  ;ifelse ( x2 >= max-pxcor) [] [if (x2 > min-pxcor)[ set xcor x2]] ;if not greater than max-pxcor and not smaller than min-pxcor
-
-  ;ifelse ( x2 <= min-pxcor) [] [if (x2 < max-pxcor)[ set xcor x2]] ;if not smaller than min-pxcor but not larger than max-pxcor
   if ( x2 > min-pxcor and x2 < max-pxcor)[ set xcor x2] ;if not smaller than min-pxcor but not larger than max-pxcor
-  ;ifelse ( y2 >= max-pycor) [] [if (y2 > min-pycor)[ set ycor y2]] ;if not greater than max-pycor and not smaller than min-pycor
-  if ( y2 > min-pycor and y2 < max-pycor)[ set ycor y2] ;if not smaller than min-pxcor but not larger than max-pxcor
-  ;ifelse ( y2 <= min-pycor) [] [if (y2 < max-pycor)[ set ycor y2]] ;if not smaller than min-pxcor but not larger than max-pxcor
+  if ( y2 > min-pycor and y2 < max-pycor)[ set ycor y2] ;if not smaller than min-pycor but not larger than max-pycor
+
 
 
 end
@@ -80,7 +76,7 @@ to test-survival
 end
 
 to reproduce
-  if random-float 1 < 0.22 ;; probability of mating
+  if random-float 1 < 0.2 ;; probability of mating
   [
     if any? other turtles in-radius mating-radius
     [
@@ -110,17 +106,16 @@ end
 
 to set-web-protection [protection-type]
 ;; danger distribution will always be sigmoid. linear and exponential left as records only
-if (protection-type = "linear" )[ask patches [set danger-level linear a b dist]] ;; linear
+if (protection-type = "linear" )    [ask patches [set danger-level linear a b dist]] ;; linear
 if (protection-type = "exponential")[ask patches [set danger-level normalize exp(dist) exp(0) exp(1) ] ]  ;; exponential
-if (protection-type = "sigmoid")[ask patches [set danger-level sigmoid dist]]
+if (protection-type = "sigmoid")    [ask patches [set danger-level sigmoid dist]]
 ask patches[
-    if (danger-level >= 1.0)[ set danger-level 0.99 ]
+    if (danger-level >= 1.0) [ set danger-level 0.99 ]
     if (danger-level <= 0.01)[ set danger-level 0.01 ]
     set pcolor danger-level * 10
   ]
 end
 
-;(1 /( 1 + (exp (- a - b * dist))))
 
 to-report normalize [number minimum maximum ]
   let normalized 0
@@ -146,7 +141,7 @@ to-report sigmoid [x]
 end
 
 to register2
-  let filename (word  danger-type "_k" k "_a" a "_b" b "_"replicate-number ".csv")
+  let filename (word  danger-type "_k_" k "_x0_" x0 "_a_" a "_b_" b "_"replicate-number ".csv")
   set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
   file-open filename
@@ -159,14 +154,11 @@ to register2
   [
   ;  let rounded-danger precision [danger-level] of patch-here 2
   ;  let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," k"," a"," b)
+    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," k"," x0 "," a "," b)
   ]
   file-close
 end
 
-to output
-
-end
 
 to plot-danger-shape
   set-current-plot "plot-danger"
@@ -278,7 +270,7 @@ CHOOSER
 danger-type
 danger-type
 "linear" "exponential" "sigmoid"
-0
+2
 
 BUTTON
 73
@@ -306,17 +298,17 @@ replicate-number
 replicate-number
 0
 500
-404.0
+4.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-125
-460
-325
-610
+653
+148
+853
+298
 plot-danger
 NIL
 NIL
@@ -354,9 +346,9 @@ SLIDER
 309
 k
 k
--50
+-20
 0
--50.0
+-10.0
 1
 1
 NIL
@@ -371,7 +363,7 @@ a
 a
 0
 1
-0.4
+1.0
 0.1
 1
 NIL
@@ -386,17 +378,17 @@ b
 b
 0
 1
-0.0
+0.1
 0.1
 1
 NIL
 HORIZONTAL
 
 PLOT
-328
-460
-528
-610
+856
+148
+1056
+298
 personalities
 NIL
 NIL
@@ -418,7 +410,7 @@ CHOOSER
 distribution
 distribution
 "uniform" "normal" "all-bold-normal" "all-bold"
-2
+0
 
 SLIDER
 428
@@ -429,7 +421,7 @@ x0
 x0
 0
 1
-0.6
+0.1
 0.1
 1
 NIL
@@ -816,58 +808,41 @@ NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment-allthree" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <final>register2</final>
-    <timeLimit steps="50"/>
-    <exitCondition>(count turtles) &gt;= 5000</exitCondition>
-    <steppedValueSet variable="replicate-number" first="1" step="1" last="500"/>
-    <enumeratedValueSet variable="danger-type">
-      <value value="&quot;linear&quot;"/>
-      <value value="&quot;exponential&quot;"/>
-      <value value="&quot;sigmoid&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="experiment2" repetitions="1" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <final>register2</final>
-    <timeLimit steps="50"/>
-    <exitCondition>(count turtles) &gt;= 5000</exitCondition>
-    <steppedValueSet variable="replicate-number" first="1" step="1" last="500"/>
-    <enumeratedValueSet variable="danger-type">
-      <value value="&quot;sigmoid&quot;"/>
-    </enumeratedValueSet>
-    <steppedValueSet variable="par" first="-20" step="5" last="-1"/>
-  </experiment>
-  <experiment name="teste" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <final>register2</final>
-    <timeLimit steps="500"/>
+    <timeLimit steps="5000"/>
+    <exitCondition>count turtles &gt;= 5000</exitCondition>
     <metric>count turtles</metric>
     <enumeratedValueSet variable="danger-type">
       <value value="&quot;sigmoid&quot;"/>
-      <value value="&quot;linear&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="x0">
-      <value value="0.6"/>
+      <value value="0.1"/>
+      <value value="0.3"/>
+      <value value="0.5"/>
       <value value="0.7"/>
+      <value value="0.9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="distribution">
       <value value="&quot;uniform&quot;"/>
+      <value value="&quot;all-bold&quot;"/>
       <value value="&quot;normal&quot;"/>
+      <value value="&quot;all-bold-normal&quot;"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="k" first="-50" step="10" last="0"/>
-    <enumeratedValueSet variable="replicate-number">
-      <value value="500"/>
+    <enumeratedValueSet variable="k">
+      <value value="-20"/>
+      <value value="-10"/>
+      <value value="-5"/>
+      <value value="-1"/>
     </enumeratedValueSet>
+    <steppedValueSet variable="replicate-number" first="0" step="1" last="10"/>
     <enumeratedValueSet variable="a">
-      <value value="0.9"/>
+      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="b">
-      <value value="0"/>
+      <value value="0.1"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
