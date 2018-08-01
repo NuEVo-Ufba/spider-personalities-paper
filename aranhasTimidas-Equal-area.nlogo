@@ -83,7 +83,7 @@ to reproduce
     let my-prob action-prob
     let mate one-of other turtles in-radius mating-radius
     let mates-prob [action-prob] of mate
-    hatch 1 [
+    hatch 2 [
       let mutate 0.0
       if random-float 1 < mutation-prob
       [
@@ -141,20 +141,20 @@ to-report sigmoid [x]
 end
 
 to register2
-  let filename (word  danger-type "_k_" k "_x0_" x0 "_a_" a "_b_" b "_"replicate-number ".csv")
+  let filename (word  danger-type "_" distribution "_" "_k_" k "_x0_" x0 "_a_" a "_b_" b "_"replicate-number ".csv")
   set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
   file-open filename
   ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
   let dt "a"
   if (danger-type = "linear" )      [set dt "l"]
-  if (danger-type = "sigmoid" )     [set dt  word "k " k ]
+  if (danger-type = "sigmoid" )     [set dt  (word "k " k " x0 " x0)]
   if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
   ;  let rounded-danger precision [danger-level] of patch-here 2
   ;  let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," replicate-number "," k"," x0 "," a "," b)
+    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," distribution ","replicate-number "," k"," x0 "," a "," b)
   ]
   file-close
 end
@@ -273,10 +273,10 @@ danger-type
 2
 
 BUTTON
-73
-310
-154
-343
+129
+285
+210
+318
 NIL
 register2\n
 NIL
@@ -298,7 +298,7 @@ replicate-number
 replicate-number
 0
 500
-4.0
+88.0
 1
 1
 NIL
@@ -346,7 +346,7 @@ SLIDER
 309
 k
 k
--20
+-15
 0
 -10.0
 1
@@ -410,7 +410,7 @@ CHOOSER
 distribution
 distribution
 "uniform" "normal" "all-bold-normal" "all-bold"
-0
+2
 
 SLIDER
 428
@@ -421,17 +421,17 @@ x0
 x0
 0
 1
-0.1
+0.5
 0.1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-65
-372
-128
-405
+40
+285
+103
+318
 NIL
 go\n
 NIL
@@ -813,17 +813,10 @@ NetLogo 6.0.3
     <go>go</go>
     <final>register2</final>
     <timeLimit steps="5000"/>
-    <exitCondition>count turtles &gt;= 5000</exitCondition>
+    <exitCondition>count turtles &gt;= 1000</exitCondition>
     <metric>count turtles</metric>
     <enumeratedValueSet variable="danger-type">
       <value value="&quot;sigmoid&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="x0">
-      <value value="0.1"/>
-      <value value="0.3"/>
-      <value value="0.5"/>
-      <value value="0.7"/>
-      <value value="0.9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="distribution">
       <value value="&quot;uniform&quot;"/>
@@ -832,12 +825,20 @@ NetLogo 6.0.3
       <value value="&quot;all-bold-normal&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="k">
-      <value value="-20"/>
       <value value="-10"/>
+      <value value="-7"/>
       <value value="-5"/>
+      <value value="-3"/>
       <value value="-1"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="replicate-number" first="0" step="1" last="10"/>
+    <enumeratedValueSet variable="x0">
+      <value value="0.1"/>
+      <value value="0.3"/>
+      <value value="0.5"/>
+      <value value="0.7"/>
+      <value value="0.9"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="replicate-number" first="0" step="1" last="100"/>
     <enumeratedValueSet variable="a">
       <value value="1"/>
     </enumeratedValueSet>
