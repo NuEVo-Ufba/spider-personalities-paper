@@ -27,10 +27,6 @@ spiders$distribution <- as.factor(spiders$distribution)
 spiders$x0 <- as.factor(spiders$x0)
 spiders$k <- as.factor(spiders$k)
 
-str(spiders)
-
-load("rdata.xuxu.Rdata")
-str(spiders)
 write.csv(spiders,"spiders.csv")
 spd <- dplyr::select(spiders, personality, danger_level, danger_shape, distribution,k,x0)
 str(spd)
@@ -61,26 +57,7 @@ spd$danger_shape <- fct_recode(spd$danger_shape,
                                "k = -07\nx0 = 0.5" = "k -7 x0 0.5",
                                "k = -03\nx0 = 0.5" = "k -3 x0 0.5"
 )
-levels(spd$danger_shape)
-summary(spd)
-p <- ggplot(spiders, aes(x = danger_shape, y = personality, fill = danger_shape)) + geom_boxplot()
-x11()
-p + facet_wrap(~distribution, ncol = 2)
 
-z <- ggplot(spd, aes(x = danger_shape, y = personality)) +
-  facet_wrap(~distribution, ncol = 2) +
-  geom_boxplot(position = position_dodge(1)) +
-  theme_light() +
-  theme( # text=element_text(family="mono"),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-  ) +
-  xlab("Danger distribution parameters") +
-  ylab("Personality")
-x11(type="cairo")
-z
-
-ggsave(file = "a4_output2.jpg", plot = z, height = 210, width = 297, units = "mm")
 # spd$danger_shape <- fct_recode(spd$danger_shape,
 #                                "k = -10 x0 = 0.5" = "k = -10\nx0 = 0.5",
 #                                "k = -10 x0 = 0.7" = "k = -10\nx0 = 0.7",
@@ -102,95 +79,6 @@ sp2norm <- dplyr::filter(spd, distribution == "Normal (mean 0.5)")
 sp2bold <- dplyr::filter(spd, distribution == "All bold (0.9)")
 sp2normbol <- dplyr::filter(spd, distribution == "Normal (mean 0.9)")
 sp2uni <- dplyr::filter(spd, distribution == "Uniform")
-
-table(sp2norm[,4:5])
-table(sp2bold[,4:5])
-table(sp2normbol[,4:5])
-table(sp2uni[,4:5])
-
-table(sp2norm[,3:5])
-table(sp2bold[,4:5])
-table(sp2normbol[,4:5])
-table(sp2uni[,4:5])
-
-
-str(sp2norm)
-nor <- aov(personality ~ x0 + k, data = sp2norm)
-nor2=lmer(personality ~ k +(1|x0), data=sp2norm)
-nor2
-tidynorm=tidy(nor2)
-analyze(nor2)
-#%>% 
-TukeyHSD() %>% tidy() %>% filter(adj.p.value <= 0.05)
-nor
-analyze(nor)
-summary(nor)
-nor$comparison <- gsub(nor$comparison, pattern = "-k", replacement = "   k")
-nor$term <- gsub(nor$term, pattern = "danger_shape", replacement = " Danger shape")
-write.csv(nor, "tukey.sp2norm.csv")
-writeLines(kable(nor,format = "latex", digits=3), "tukey.sp2norm.tex")
-render("tukey.sp2norm.tex","pdf_document")
-
-
-bold <- aov(personality ~ danger_shape, data = droplevels(sp2bold)) %>% TukeyHSD() %>% tidy() %>% filter(adj.p.value <= 0.05)
-bold$comparison <- gsub(bold$comparison, pattern = "-k", replacement = "  k")
-write.csv(bold, "tukey.sp2bold.csv")
-write.table(kable(bold), "tukey.sp2bold.tex")
-
-normbol <- aov(personality ~ danger_shape, data = droplevels(sp2normbol)) %>% TukeyHSD() %>% tidy() %>% filter(adj.p.value <= 0.05)
-normbol$comparison <- gsub(normbol$comparison, pattern = "-k", replacement = "  k")
-write.csv(normbol, "tukey.sp2normbold.csv")
-write.table(stargazer(normbol), "tukey.sp2normbold.tex")
-
-uni <- aov(personality ~ danger_shape, data = droplevels(sp2uni)) %>% TukeyHSD() %>% tidy() %>% filter(adj.p.value <= 0.05)
-uni$comparison <- gsub(uni$comparison, pattern = "-k", replacement = "  k")
-write.csv(uni, "tukey.sp2uni.csv")
-write.table(stargazer(uni), "tukey.sp2uni.tex")
-
-
-
-
-### ridgeplots
-
-# install.packages("ggridges")
-# library(ggridges)
-# data_url = 'http://bit.ly/2cLzoxH'
-# # read data from url as dataframe
-# gapminder = read.csv(data_url)
-# ggplot(gapminder, aes(y=as.factor(year),
-#                       x=lifeExp)) +
-#   geom_density_ridges(alpha=0.5) +
-#   scale_y_discrete(expand = c(0.01, 0)) +  
-#   scale_x_continuous(expand = c(0, 0))+
-#   theme(axis.text=element_text(size=20))
-
-#Plotando  distribuições finais
-#pallete=c("magma", "inferno", "plasma", "viridis", "cividis")
-
-# for (i in 1:length(pallete)) {
-#   x11(type = "cairo")
-#   p = ggplot(spd, aes( y = as.factor(x0), x = personality
-#                        , fill = k
-#                        , height = ..density..)) +
-#     facet_wrap(~spd$distribution, ncol = 2) +
-#     #ggtitle(pallete[i]) +
-#     geom_density_ridges(alpha = 0.3, scale = 1, stat = "density") +
-#     scale_y_discrete(name = "Refuge Size", expand = c(0.01, 0)) +
-#     scale_x_continuous(name = "Personality Index", breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
-#     theme(text = element_text(size = 30)) +
-#     facet_wrap(~spd$distribution, ncol = 2) +
-#     theme_ridges(center_axis_labels = T) +
-#     scale_fill_viridis_d(name = "Refuge\nProtection", option = "viridis")
-#   x11(type="cairo");print(p)
-# }
-#  facet_grid(rows = spd$distribution)
-
-#creating initial distributions
-#if (pers-dist = "uniform")         [set personality random-float 1]
-#if (pers-dist = "all-bold")        [set personality 0.9]
-#if (pers-dist = "normal")          [set personality random-normal 0.5 0.1]
-#if (pers-dist = "all-bold-normal") [set personality random-normal 0.9 0.1]
-
 
 set.seed(1)
 init.uniform <- rep(  rep(runif(100, min = 0, max = 1), 501) # 501 réplicas
