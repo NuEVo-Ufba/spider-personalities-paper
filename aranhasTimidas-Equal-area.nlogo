@@ -14,7 +14,7 @@ to setup
 create-turtles 100
 ask turtles [
   setxy random-xcor random-ycor;
-  set action-prob precision random-float 1 2
+  ;;set action-prob precision random-float 1 2
   set mating-radius max-pxcor / 20
   set mutation-rate 0.01 ;; percentual change in action-prob value
   set mutation-prob 0.1
@@ -76,13 +76,13 @@ to test-survival
 end
 
 to reproduce
-  if random-float 1 < 0.2 ;; probability of mating
+  if random-float 1 < 0.20 ;; probability of mating
   [
     if any? other turtles in-radius mating-radius
     [
-    let my-prob action-prob
+    let my-pers personality
     let mate one-of other turtles in-radius mating-radius
-    let mates-prob [action-prob] of mate
+    let mates-pers [personality] of mate
     hatch 2 [
       let mutate 0.0
       if random-float 1 < mutation-prob
@@ -91,7 +91,7 @@ to reproduce
           [set mutate mutation-rate]
           [set mutate mutation-rate * -1]
         ]
-      set action-prob (((my-prob + mates-prob) / 2)  + mutate)
+       set personality (((my-pers + mates-pers) / 2)  + mutate)
       set age 0
       ]
     ]
@@ -142,19 +142,20 @@ end
 
 to register2
   let filename (word  danger-type "_" distribution "_" "_k_" k "_x0_" x0 "_a_" a "_b_" b "_"replicate-number ".csv")
-  set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
+  ;set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
+  set-current-directory "/Users/vrios/Documents/repositories/spider-personalities/output"
+  ;set-current-directory "C:\\Users\\vrios\\Dropbox\\repositorios\\space-spiders\\output\\"
   if (file-exists? filename) [file-delete filename]
   file-open filename
-  ;file-print  (word "ticks , who , action-prob , danger-level, danger-type, replicate-number")
+
   let dt "a"
   if (danger-type = "linear" )      [set dt "l"]
   if (danger-type = "sigmoid" )     [set dt  (word "k " k " x0 " x0)]
   if (danger-type = "exponential" ) [set dt "e"]
   ask turtles
   [
-  ;  let rounded-danger precision [danger-level] of patch-here 2
-  ;  let rounded-action-prob precision  action-prob 2
-    file-print  (word ticks "," who "," action-prob "," [danger-level] of patch-here "," dt "," distribution ","replicate-number "," k"," x0 "," a "," b)
+
+    file-print  (word ticks "," who "," personality "," [danger-level] of patch-here "," dt "," distribution ","replicate-number "," k"," x0 "," a "," b)
   ]
   file-close
 end
@@ -186,7 +187,7 @@ to plot-personalities
   set-current-plot-pen "pen-0"
   set-plot-pen-mode 1
   set-histogram-num-bars 5
-  histogram [action-prob] of turtles
+  histogram [personality] of turtles
 
 end
 @#$#@#$#@
@@ -298,7 +299,7 @@ replicate-number
 replicate-number
 0
 500
-88.0
+100.0
 1
 1
 NIL
@@ -410,7 +411,7 @@ CHOOSER
 distribution
 distribution
 "uniform" "normal" "all-bold-normal" "all-bold"
-2
+0
 
 SLIDER
 428
@@ -421,7 +422,7 @@ x0
 x0
 0
 1
-0.5
+0.1
 0.1
 1
 NIL
@@ -838,7 +839,7 @@ NetLogo 6.0.3
       <value value="0.7"/>
       <value value="0.9"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="replicate-number" first="0" step="1" last="100"/>
+    <steppedValueSet variable="replicate-number" first="0" step="1" last="500"/>
     <enumeratedValueSet variable="a">
       <value value="1"/>
     </enumeratedValueSet>
